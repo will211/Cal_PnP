@@ -1,0 +1,32 @@
+{
+  "genInfo": {
+    "inFrmPth": "../data/frm.jpg",
+    "outCamMatPth": "../data/calibration.txt",
+    "outCalDispPth": "../data/calibration.jpg",
+    "outCalDispFlg": 1,
+    "rszFrmHei": -1
+  },
+  "camCal": {
+    "calSel2dPtFlg": 1,
+    "cal2dPtLs": [],
+    "cal3dPtLs": [
+      [42.498349, -90.688198],
+      [42.498338, -90.688232],
+      [42.498229, -90.688179],
+      [42.498231, -90.688216],
+      [42.498205, -90.688171],
+      [42.498248, -90.688020],
+      [42.498221, -90.688014],
+      [42.498253, -90.687983],
+      [42.498368, -90.688038],
+      [42.498369, -90.688001]
+    ],
+    "calTyp": -1,
+    "calRansacReprojThld": 100.0,
+    "calDispGrdDim": [10, 10],
+    "calDistFlg": 0,
+    "calDistCoeff": [0.0, 0.0, 0.0, 0.0],
+    "calFocLen": [-1],
+    "calPrinPt": [-1, -1]
+  }
+}

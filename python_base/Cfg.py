@@ -29,6 +29,8 @@ class CCfg:
         with open(acCfgFlPth, "r") as poCfgFl:
             config_data = json.load(poCfgFl)
 
+        # 3D graph
+        self.m_acPic0 = config_data['genInfo'].get("pic0", "../data/pic0.jpg")
         self.m_acInFrmPth = config_data['genInfo'].get("inFrmPth", "../data/frm.jpg")
         self.m_acOutCamMatPth = config_data['genInfo'].get("outCamMatPth", "../data/calibration.txt")
         self.m_acOutCalDispPth = config_data['genInfo'].get("outCalDispPth", "../data/calibration.jpg")
@@ -47,9 +49,9 @@ class CCfg:
 
         # Assertion
 
-        assert len(self.m_voCal3dPt) >= 4
-        if not self.m_bCalSel2dPtFlg:
-            assert len(self.m_voCal2dPt) == len(self.m_voCal3dPt)
+        # assert len(self.m_voCal3dPt) >= 4
+        # if not self.m_bCalSel2dPtFlg:
+        #     assert len(self.m_voCal2dPt) == len(self.m_voCal3dPt)
         assert self.m_nCalTyp in [0, 4, 8, -1]
         assert self.m_fCalRansacReprojThld >= 1
         assert all(dim >= 1 for dim in self.m_oCalDispGrdDim)

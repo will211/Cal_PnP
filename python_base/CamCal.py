@@ -4,12 +4,15 @@ from Cfg import CCfg
 
 class C2dPtSel:
     def __init__(self):
-        self.m_voNd = []
+        self.m_2dvoNd = []
+        self.m_3dvoNd = []
         self.m_oImgFrm = None
 
-    def initialize(self, oCfg, oImgFrm):
+    def initialize(self, oCfg, oImgFrm, oImgPic0):
         self.m_oCfg = oCfg
         self.m_oImgFrm = oImgFrm.copy()
+        self.m_oImgPic0 = oImgPic0.copy()
+        self.bothImg = np.hstack((self.m_oImgFrm, self.m_oImgPic0))
     
     def chk_img_ld(self):
         # TODO
@@ -26,11 +29,11 @@ class C2dPtSel:
                   "\tr - re-select a set of 2D points\n"
                   "\to - finish selecting a set of 2D points\n")
 
-            oImgFrm = self.m_oImgFrm.copy()
+            copy_Img = self.bothImg.copy()
 
-            cv2.namedWindow("selector of 2D points", cv2.WINDOW_NORMAL)
-            cv2.imshow("selector of 2D points", self.m_oImgFrm)
-            cv2.setMouseCallback("selector of 2D points", self.on_mouse)  # Register for mouse event
+            cv2.namedWindow("selector of 2D and 3D points", cv2.WINDOW_NORMAL)
+            cv2.imshow("selector of 2D and 3D points", self.bothImg)
+            cv2.setMouseCallback("selector of 2D and 3D points", self.on_mouse)  # Register for mouse event
 
             while True:
                 nKey = cv2.waitKey(0)  # read keyboard event
@@ -39,45 +42,52 @@ class C2dPtSel:
                     break
 
                 if nKey == ord('r'):  # reset the nodes
-                    self.m_voNd = []
-                    self.m_oImgFrm = oImgFrm.copy()
-                    cv2.imshow("selector of 2D points", self.m_oImgFrm)
+                    self.m_2dvoNd = []
+                    self.m_3dvoNd = []
+                    self.bothImg = copy_Img.copy()
+                    cv2.imshow("selector of 2D and 3D points", self.bothImg)
 
                 if nKey == ord('o'):  # finish selection of pairs of test points
-                    cv2.destroyWindow("selector of 2D points")
-                    vo3dPt = self.m_oCfg.m_voCal3dPt
-                    if len(vo3dPt) == len(self.m_voNd):
-                        return self.m_voNd
-                    else:
-                        print("Error: Mis-match between the number of selected 2D points and the number of 3D points.")
-                        break
+                    cv2.destroyWindow("selector of 2D and 3D points")
+                    return self.m_2dvoNd, self.m_3dvoNd
 
     def on_mouse(self, event, x, y, flags, param):
         if not self.chk_img_ld():
             print("Error: on_mouse(): frame image is unloaded")
             return
 
-        if event == cv2.EVENT_LBUTTONUP:
-            self.add_nd(x, y)
+        if event == cv2.EVENT_LBUTTONUP and x < self.m_oImgFrm.shape[1]:
+            self.add_nd2D(x, y)
+        elif event == cv2.EVENT_LBUTTONUP and x >= self.m_oImgFrm.shape[1] and x < self.bothImg.shape[1]:
+            self.add_nd3D(x, y)
 
-    def add_nd(self, nX, nY):
+    def add_nd2D(self, nX, nY):
         oCurrNd = (nX, nY)
-        self.m_voNd.append(oCurrNd)
-        cv2.circle(self.m_oImgFrm, oCurrNd, 6, (255, 0, 0), 1, cv2.LINE_AA)  # draw the circle
-        cv2.putText(self.m_oImgFrm, str(len(self.m_voNd) - 1), oCurrNd, cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-        cv2.imshow("selector of 2D points", self.m_oImgFrm)
+        self.m_2dvoNd.append(oCurrNd)
+        cv2.circle(self.bothImg, oCurrNd, 6, (255, 0, 0), 1, cv2.LINE_AA)  # draw the circle
+        cv2.putText(self.bothImg, str(len(self.m_2dvoNd) - 1), oCurrNd, cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+        cv2.imshow("selector of 2D and 3D points", self.bothImg)
+
+    def add_nd3D(self, nX, nY):
+        oCurrNd = (nX, nY)
+        self.m_3dvoNd.append(oCurrNd)
+        cv2.circle(self.bothImg, oCurrNd, 6, (255, 0, 0), 1, cv2.LINE_AA)  # draw the circle
+        cv2.putText(self.bothImg, str(len(self.m_3dvoNd) - 1), oCurrNd, cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+        cv2.imshow("selector of 2D and 3D points", self.bothImg)
 
 
 class CCamCal:
     def __init__(self):
         self.m_vo3dPt = []
         self.m_vo2dPt = []
+        # self.m_oHomoMat = np.zeros((3, 3), dtype=np.float64)
+        # self.m_fReprojErr = np.inf
         self.o2dPtSel = C2dPtSel()
 
-    def initialize(self, oCfg: CCfg, oImgFrm):
+    def initialize(self, oCfg: CCfg, oImgFrm, oImgPic0):
         self.m_oCfg = oCfg
         self.m_oImgFrm = oImgFrm.copy()
-        self.m_vo3dPt = self.m_oCfg.m_voCal3dPt
+        self.m_oImgPic0 = oImgPic0.copy()
 
         if not self.m_oCfg.m_bCalSel2dPtFlg:
             self.m_vo2dPt = self.m_oCfg.m_voCal2dPt
@@ -89,8 +99,9 @@ class CCamCal:
         #  select 2D points if they are not provided in the configuration file
         if self.m_oCfg.m_bCalSel2dPtFlg:
             self.m_vo2dPt = []
-            self.o2dPtSel.initialize(self.m_oCfg, self.m_oImgFrm)
-            vo2dPt = self.o2dPtSel.process()
+            self.o2dPtSel.initialize(self.m_oCfg, self.m_oImgFrm, self.m_oImgPic0)
+            vo2dPt, vo3dPt = self.o2dPtSel.process()
+
             print("Selected 2D points on the frame image:")
             for i in range(len(vo2dPt)):
                 self.m_vo2dPt.append(vo2dPt[i])
@@ -98,6 +109,14 @@ class CCamCal:
                     print("[ {}, {} ],".format(vo2dPt[i][0], vo2dPt[i][1]))
                 else:
                     print("[ {}, {} ]".format(vo2dPt[i][0], vo2dPt[i][1]))
+
+            print("Selected 3D points on the frame image:")
+            for i in range(len(vo3dPt)):
+                self.m_vo3dPt.append(vo3dPt[i])
+                if len(vo3dPt) - 1 > i:
+                    print("[ {}, {} ],".format(vo3dPt[i][0], vo3dPt[i][1]))
+                else:
+                    print("[ {}, {} ]".format(vo3dPt[i][0], vo3dPt[i][1]))
 
         # compute homography matrix
         if -1 == self.m_oCfg.m_nCalTyp:
@@ -154,7 +173,6 @@ class CCamCal:
         fReprojErr = 0
 
         for i in range(len(self.m_vo3dPt)):
-
             o3dPtMat = np.array([[self.m_vo3dPt[i][0]], [self.m_vo3dPt[i][1]], [1]], dtype=np.float64)
             o2dPtMat = np.dot(oHomoMat, o3dPtMat)
 

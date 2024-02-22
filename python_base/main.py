@@ -23,10 +23,14 @@ def main():
     # read frame image
     oImgFrm = cv2.imread(oCfg.m_acInFrmPth, cv2.IMREAD_COLOR)
 
+    # Add 3D image
+    oImgPic0 = cv2.imread(oCfg.m_acPic0, cv2.IMREAD_COLOR)
+
     # resize frame if necessary
     if oCfg.m_nRszFrmHei > 0:
         oFrmSz = ((oImgFrm.shape[1] / oImgFrm.shape[0]) * oCfg.m_nRszFrmHei, oCfg.m_nRszFrmHei)
         oImgFrm = cv2.resize(oImgFrm, (int(oFrmSz[0]), int(oFrmSz[1])))
+        oImgPic0 = cv2.resize(oImgPic0, (int(oFrmSz[0]), int(oFrmSz[1])))
         
 
     # correct camera distortion
@@ -35,7 +39,7 @@ def main():
         oImgFrm = oImgUndist.copy()
 
     # initialize the camera calibrator
-    oCamCal.initialize(oCfg, oImgFrm)
+    oCamCal.initialize(oCfg, oImgFrm, oImgPic0)
 
     # run camera calibration
     oCamCal.process()

@@ -5,7 +5,7 @@
     "outCamMatPth": "../data/calibration.txt",
     "outCalDispPth": "../data/calibration.jpg",
     "outCalDispFlg": 1,
-    "rszFrmHei": 800
+    "rszFrmHei": 400
   },
   "camCal": {
     "calSel2dPtFlg": 1,

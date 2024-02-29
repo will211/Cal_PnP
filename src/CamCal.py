@@ -13,9 +13,8 @@ class C2dPtSel:
         self.m_oImgFrm = oImgFrm.copy()
         self.m_oImgPic0 = oImgPic0.copy()
         self.bothImg = np.hstack((self.m_oImgFrm, self.m_oImgPic0))
-    
     def chk_img_ld(self):
-        # TODO
+        # 
         # if not self.m_oImgFrm:
         #     return False
         # else:
@@ -64,15 +63,15 @@ class C2dPtSel:
     def add_nd2D(self, nX, nY):
         oCurrNd = (nX, nY)
         self.m_2dvoNd.append(oCurrNd)
-        cv2.circle(self.bothImg, oCurrNd, 6, (255, 0, 0), 1, cv2.LINE_AA)  # draw the circle
-        cv2.putText(self.bothImg, str(len(self.m_2dvoNd) - 1), oCurrNd, cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+        cv2.circle(self.bothImg, oCurrNd, 4, (255, 0, 0), 1, cv2.LINE_AA)  # draw the circle
+        cv2.putText(self.bothImg, str(len(self.m_2dvoNd) - 1), oCurrNd, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
         cv2.imshow("selector of 2D and 3D points", self.bothImg)
 
     def add_nd3D(self, nX, nY):
         oCurrNd = (nX, nY)
         self.m_3dvoNd.append(oCurrNd)
-        cv2.circle(self.bothImg, oCurrNd, 6, (255, 0, 0), 1, cv2.LINE_AA)  # draw the circle
-        cv2.putText(self.bothImg, str(len(self.m_3dvoNd) - 1), oCurrNd, cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+        cv2.circle(self.bothImg, oCurrNd, 4, (0, 0, 255), 1, cv2.LINE_AA)  # draw the circle
+        cv2.putText(self.bothImg, str(len(self.m_3dvoNd) - 1), oCurrNd, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
         cv2.imshow("selector of 2D and 3D points", self.bothImg)
 
 
@@ -80,8 +79,6 @@ class CCamCal:
     def __init__(self):
         self.m_vo3dPt = []
         self.m_vo2dPt = []
-        # self.m_oHomoMat = np.zeros((3, 3), dtype=np.float64)
-        # self.m_fReprojErr = np.inf
         self.o2dPtSel = C2dPtSel()
 
     def initialize(self, oCfg: CCfg, oImgFrm, oImgPic0):
@@ -285,8 +282,8 @@ class CCamCal:
         # plot the 2D points
         for i, pt in enumerate(self.m_vo2dPt):
             acPtIdx = str(i)
-            cv2.circle(oImgPlt, pt, 6, (255, 0, 0), 1, cv2.LINE_AA)
-            cv2.putText(oImgPlt, acPtIdx, pt, cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+            cv2.circle(oImgPlt, pt, 4, (255, 0, 0), 1, cv2.LINE_AA)
+            cv2.putText(oImgPlt, acPtIdx, pt, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 
         # plot the projected 2D points
 		# plot the 2D points
@@ -294,7 +291,7 @@ class CCamCal:
             o3dPtMat = np.array([[self.m_vo3dPt[i][0]], [self.m_vo3dPt[i][1]], [1]])
             o2dPtMat = np.dot(self.m_oHomoMat, o3dPtMat)
             cv2.circle(oImgPlt, (int(o2dPtMat[0, 0] / o2dPtMat[2, 0]), int(o2dPtMat[1, 0] / o2dPtMat[2, 0])),
-                       12, (0, 0, 255), 1, cv2.LINE_AA)
+                       8, (0, 0, 255), 1, cv2.LINE_AA)
 
         # display plotted image
         cv2.namedWindow("3D grid on the ground plane", cv2.WINDOW_NORMAL)
@@ -305,4 +302,3 @@ class CCamCal:
         # save plotted image
         if self.m_oCfg.m_bOutCalDispFlg:
             cv2.imwrite(self.m_oCfg.m_acOutCalDispPth, oImgPlt)
-

@@ -28,9 +28,9 @@ def main():
 
     # resize frame if necessary
     if oCfg.m_nRszFrmHei > 0:
-        oFrmSz = ((oImgFrm.shape[1] / oImgFrm.shape[0]) * oCfg.m_nRszFrmHei, oCfg.m_nRszFrmHei)
-        oImgFrm = cv2.resize(oImgFrm, (int(oFrmSz[0]), int(oFrmSz[1])))
-        oImgPic0 = cv2.resize(oImgPic0, (int(oFrmSz[0]), int(oFrmSz[1])))
+        oFrmSz2d = ((oImgFrm.shape[1] / oImgFrm.shape[0]) * oCfg.m_nRszFrmHei, oCfg.m_nRszFrmHei)
+        oImgFrm = cv2.resize(oImgFrm, (int(oFrmSz2d[0]), int(oFrmSz2d[1])))
+        oImgPic0 = cv2.resize(oImgPic0, (int(oFrmSz2d[0]), int(oFrmSz2d[1])))
         
 
     # correct camera distortion

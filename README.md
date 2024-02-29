@@ -74,4 +74,4 @@ Forked and modified the code from [Zheng (Thomas) Tang](https://github.com/zheng
 
 ## Disclaimer
 
-For any question you can contact [William Tang](https://github.com/will211).
+For any question you can contact [William Chen](https://github.com/will211).

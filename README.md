@@ -33,7 +33,7 @@ This package is designed for computing camera homography matrix. The input inclu
 2. If the user want to select the 2D and 3D pixel points on the image, set `calSel2dPtFlg` to 1. A new window called `selector of 2D and 3D points` pops out. The user can click on the image to select each 2D and 3D points. A blue or red circle stands for each click. After the selection is done, click `o`. Please make sure the number of selected 2D points should be the same as the 3D points (in the same order). During the selection, if mis-clicking on wrong places, the user can press `r`. All the markers will be cleared, and s/he can start over.
 
 <div align="center">
-    <img src="/pic/pic3.jpg", width="700">
+    <img src="/pic/pic3.jpg", width="900">
 </div>
 
 3. If there exists radial distortion, the frame image can be manually corrected by by setting `calDistFlg` to 1 and providing the distortion coefficients (`calDistCoeff`) and intrinsic camera parameters (`calFocLen` and `calPrinPt`). 

@@ -14,7 +14,6 @@ class C2dPtSel:
         self.m_oImgPic0 = oImgPic0.copy()
         self.bothImg = np.hstack((self.m_oImgFrm, self.m_oImgPic0))
     def chk_img_ld(self):
-        # 
         # if not self.m_oImgFrm:
         #     return False
         # else:
@@ -90,6 +89,7 @@ class CCamCal:
             self.m_vo2dPt = self.m_oCfg.m_voCal2dPt
 
         self.m_oHomoMat = np.zeros((3, 3), dtype=np.float64)
+        self.m_oHomoMat3D = np.zeros((3, 3), dtype=np.float64)
         self.m_fReprojErr = np.inf
 
     def process(self):
@@ -165,7 +165,6 @@ class CCamCal:
             except cv2.error as e:
                 print("Exception caught:", e)
 
-
     def calc_reproj_err(self, oHomoMat, nCalTyp, fCalRansacReprojThld):
         fReprojErr = 0
 
@@ -219,6 +218,7 @@ class CCamCal:
 
     def pltDispGrd(self):
         oImgPlt = self.m_oImgFrm.copy()
+        oImgPlt3D = self.m_oImgPic0.copy()
         oDispGrdDim = self.m_oCfg.m_oCalDispGrdDim
 
         fXMin = float('inf')
@@ -270,7 +270,7 @@ class CCamCal:
             o2dPtMat = np.dot(self.m_oHomoMat, o3dPtMat)
             vo2dGrdPtRgt.append((o2dPtMat[0, 0] / o2dPtMat[2, 0], o2dPtMat[1, 0] / o2dPtMat[2, 0]))
 
-	    # draw grid lines on the frame image
+	    # draw grid lines on the 2D frame image
         for i in range(oDispGrdDim[0]):
             cv2.line(oImgPlt, tuple(map(int, vo2dGrdPtTop[i])), tuple(map(int, vo2dGrdPtBtm[i])),
                      (int(255.0 * (i / oDispGrdDim[0])), 127, 127), 2, cv2.LINE_AA)
@@ -293,12 +293,53 @@ class CCamCal:
             cv2.circle(oImgPlt, (int(o2dPtMat[0, 0] / o2dPtMat[2, 0]), int(o2dPtMat[1, 0] / o2dPtMat[2, 0])),
                        8, (0, 0, 255), 1, cv2.LINE_AA)
 
+        self.bothImg = np.hstack((oImgPlt, oImgPlt3D))
+        self.m_oHomoMat3D = np.linalg.inv(self.m_oHomoMat)
+
+	    # draw grid lines on the 3D frame image
+        for i in range(oDispGrdDim[0]):
+            o2dPtMatTop = np.array([[vo2dGrdPtTop[i][0]], [vo2dGrdPtTop[i][1]], [1]])
+            o3dPtMatTop = np.dot(self.m_oHomoMat3D, o2dPtMatTop)
+            vo2dGrdPtTop[i] = (int(o3dPtMatTop[0, 0] / o3dPtMatTop[2, 0]), int(o3dPtMatTop[1, 0] / o3dPtMatTop[2, 0]))
+
+            o2dPtMatBtm = np.array([[vo2dGrdPtBtm[i][0]], [vo2dGrdPtBtm[i][1]], [1]])
+            o3dPtMatBtm = np.dot(self.m_oHomoMat3D, o2dPtMatBtm)
+            vo2dGrdPtBtm[i] = (int(o3dPtMatBtm[0, 0] / o3dPtMatBtm[2, 0]), int(o3dPtMatBtm[1, 0] / o3dPtMatBtm[2, 0]))
+
+            cv2.line(self.bothImg, tuple(map(int, vo2dGrdPtTop[i])), tuple(map(int, vo2dGrdPtBtm[i])),
+                     (int(255.0 * (i / oDispGrdDim[0])), 127, 127), 2, cv2.LINE_AA)
+
+        for i in range(oDispGrdDim[1]):
+            o2dPtMatLft = np.array([[vo2dGrdPtLft[i][0]], [vo2dGrdPtLft[i][1]], [1]])
+            o3dPtMatLft = np.dot(self.m_oHomoMat3D, o2dPtMatLft)
+            vo2dGrdPtLft[i] = (int(o3dPtMatLft[0, 0] / o3dPtMatLft[2, 0]), int(o3dPtMatLft[1, 0] / o3dPtMatLft[2, 0]))
+
+            o2dPtMatRgt = np.array([[vo2dGrdPtRgt[i][0]], [vo2dGrdPtRgt[i][1]], [1]])
+            o3dPtMatRgt = np.dot(self.m_oHomoMat3D, o2dPtMatRgt)
+            vo2dGrdPtRgt[i] = (int(o3dPtMatRgt[0, 0] / o3dPtMatRgt[2, 0]), int(o3dPtMatRgt[1, 0] / o3dPtMatRgt[2, 0]))
+            cv2.line(self.bothImg, tuple(map(int, vo2dGrdPtLft[i])), tuple(map(int, vo2dGrdPtRgt[i])),
+                     (127, 127, int(255.0 * (i / oDispGrdDim[1]))), 2, cv2.LINE_AA)
+
+        # plot the 3D points
+        for i, pt in enumerate(self.m_vo3dPt):
+            acPtIdx = str(i)
+            cv2.circle(self.bothImg, pt, 4, (0, 0, 255), 1, cv2.LINE_AA)
+            cv2.putText(self.bothImg, acPtIdx, pt, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+
+        # plot the projected 3D points
+		# plot the 3D points
+        for i in range(len(self.m_vo3dPt)):
+            o2dPtMat = np.array([[self.m_vo2dPt[i][0]], [self.m_vo2dPt[i][1]], [1]])
+            o3dPtMat = np.dot(self.m_oHomoMat3D, o2dPtMat)
+            cv2.circle(self.bothImg, (int(o3dPtMat[0, 0] / o3dPtMat[2, 0]), int(o3dPtMat[1, 0] / o3dPtMat[2, 0])),
+                       8, (255, 0, 0), 1, cv2.LINE_AA)
+
         # display plotted image
         cv2.namedWindow("3D grid on the ground plane", cv2.WINDOW_NORMAL)
-        cv2.imshow("3D grid on the ground plane", oImgPlt)
+        cv2.imshow("3D grid on the ground plane", self.bothImg)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
         # save plotted image
         if self.m_oCfg.m_bOutCalDispFlg:
-            cv2.imwrite(self.m_oCfg.m_acOutCalDispPth, oImgPlt)
+            cv2.imwrite(self.m_oCfg.m_acOutCalDispPth, self.bothImg)

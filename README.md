@@ -42,7 +42,7 @@ This package is designed for computing camera homography matrix. The input inclu
 6. The user can choose to output the display image (with a colorful grid on the 3D plane) by setting `outCalDispFlg` to 1. The blue circles show the input 2D pixel points. The red circles show the corresponding points back projected from 3D. The distance between their centers indicates the reprojection error. 
 
 <div align="center">
-    <img src="/pic/pic2.jpg", width="640">
+    <img src="/pic/pic2.png", width="900">
 </div>
 
 7. Run the main.py program.
